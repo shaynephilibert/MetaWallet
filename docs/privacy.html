@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — PromptVault</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #0f0f11;
+      color: #e2e2e8;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #2a2a35;
+    }
+
+    header svg {
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+
+    header p {
+      font-size: 0.8rem;
+      color: #8888a0;
+      margin-top: 0.15rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1a1a2e;
+      border: 1px solid #2a2a45;
+      color: #a78bfa;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    p {
+      color: #b0b0c8;
+      font-size: 0.925rem;
+      margin-bottom: 0.75rem;
+    }
+
+    ul {
+      padding-left: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    ul li {
+      color: #b0b0c8;
+      font-size: 0.925rem;
+      margin-bottom: 0.35rem;
+    }
+
+    ul li strong {
+      color: #e2e2e8;
+      font-weight: 600;
+    }
+
+    .callout {
+      background: #13131f;
+      border: 1px solid #2a2a40;
+      border-left: 3px solid #7c3aed;
+      border-radius: 6px;
+      padding: 0.9rem 1.1rem;
+      margin: 1.5rem 0;
+    }
+
+    .callout p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #c4c4dc;
+    }
+
+    a {
+      color: #a78bfa;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #2a2a35;
+      font-size: 0.8rem;
+      color: #666680;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="36" height="36" rx="8" fill="#7c3aed"/>
+        <path d="M11 14a7 7 0 0 1 14 0v1h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1v-1zm2 1h10v-1a5 5 0 0 0-10 0v1zm5 5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" fill="white"/>
+      </svg>
+      <div>
+        <h1>PromptVault</h1>
+        <p>Private AI Prompt Manager</p>
+      </div>
+    </header>
+
+    <span class="badge">Privacy Policy</span>
+
+    <div class="callout">
+      <p><strong>The short version:</strong> PromptVault stores your prompts locally on your device, encrypted with your password. We have no servers. We collect no personal data. Your prompts never leave your browser.</p>
+    </div>
+
+    <p>This Privacy Policy describes how PromptVault ("the extension", "we", "our") handles information when you use our Chrome extension. Effective date: <strong>March 28, 2026</strong>.</p>
+
+    <h2>1. Information We Collect</h2>
+    <p>PromptVault collects <strong>no personal information</strong>. Specifically, we do not collect your name, email address, IP address, location, or any other identifying data.</p>
+
+    <h2>2. Data Stored on Your Device</h2>
+    <p>All vault data is stored locally in your browser using the <code>chrome.storage.local</code> API. This includes:</p>
+    <ul>
+      <li><strong>Prompt contents</strong> — titles, body text, categories, tags, pinned status, creation timestamps, and usage counts</li>
+      <li><strong>App state</strong> — whether you have completed the onboarding flow</li>
+    </ul>
+    <p>All prompt data is encrypted with AES-256 before being written to storage. Your password is used to perform this encryption and is <strong>never stored anywhere</strong> — not on your device, not on any server. If you forget your password, your vault data cannot be recovered.</p>
+    <p>Uninstalling the extension permanently deletes all locally stored data.</p>
+
+    <h2>3. Export and Import</h2>
+    <p>You may export your vault as a JSON file for backup purposes. This file is saved to your device and is only shared if you choose to share it. We have no access to exported files.</p>
+
+    <h2>4. External Services</h2>
+    <p>PromptVault uses <strong>ExtensionPay</strong> (by Llama Life LLC), a third-party payment processor, solely to verify whether you have an active Pro subscription. When the extension checks your subscription status, it communicates with ExtensionPay's servers. Payment processing is handled by Stripe through ExtensionPay's backend.</p>
+    <p>We do not receive or store any payment information. ExtensionPay's privacy policy is available at <a href="https://extensionpay.com/privacy" target="_blank" rel="noopener">extensionpay.com/privacy</a>.</p>
+    <p>No other external services, analytics platforms, or tracking tools are used.</p>
+
+    <h2>5. Permissions</h2>
+    <p>PromptVault requests the following Chrome permissions:</p>
+    <ul>
+      <li><strong>storage</strong> — to save your encrypted vault locally</li>
+      <li><strong>activeTab</strong> — to detect which AI platform you are currently viewing</li>
+      <li><strong>scripting</strong> — to send your prompt text into the AI platform's input field</li>
+    </ul>
+    <p>The extension also requests access to the following websites: <code>chatgpt.com</code>, <code>claude.ai</code>, <code>gemini.google.com</code>, and <code>grok.com</code>. This access is used exclusively to inject your chosen prompt into the AI's text input. The extension does <strong>not</strong> read, record, or transmit any content from these pages.</p>
+
+    <h2>6. No Analytics or Telemetry</h2>
+    <p>We do not use Google Analytics, Mixpanel, Sentry, or any other analytics or error-reporting service. No usage data, crash reports, or behavioral metrics are sent anywhere.</p>
+
+    <h2>7. Children's Privacy</h2>
+    <p>PromptVault does not knowingly collect any information from children under the age of 13.</p>
+
+    <h2>8. Changes to This Policy</h2>
+    <p>If we make material changes to this policy, we will update the effective date above. Continued use of the extension after changes take effect constitutes acceptance of the updated policy.</p>
+
+    <h2>9. Contact</h2>
+    <p>If you have questions about this privacy policy, you can reach us at <a href="mailto:sphilibert@gmail.com">sphilibert@gmail.com</a>.</p>
+
+    <footer>
+      <p>PromptVault &mdash; &copy; 2026. All rights reserved.</p>
+    </footer>
+
+  </div>
+</body>
+</html>
