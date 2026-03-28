@@ -1,10 +1,11 @@
 interface Props {
   categories: string[];
   active: string;
+  showTop: boolean;
   onChange: (category: string) => void;
 }
 
-export default function CategoryFilter({ categories, active, onChange }: Props) {
+export default function CategoryFilter({ categories, active, showTop, onChange }: Props) {
   return (
     <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
       <button
@@ -17,6 +18,18 @@ export default function CategoryFilter({ categories, active, onChange }: Props) 
       >
         All
       </button>
+      {showTop && (
+        <button
+          onClick={() => onChange('Top')}
+          className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+            active === 'Top'
+              ? 'bg-amber-600 text-white'
+              : 'bg-gray-800 text-amber-500 hover:bg-gray-700'
+          }`}
+        >
+          ★ Top
+        </button>
+      )}
       {categories.map((cat) => (
         <button
           key={cat}

@@ -11,7 +11,7 @@ import UpgradeModal from './UpgradeModal';
 const FREE_PROMPT_LIMIT = 15;
 const FREE_CATEGORY_LIMIT = 3;
 
-type SortOrder = 'newest' | 'oldest' | 'az' | 'za';
+type SortOrder = 'newest' | 'oldest' | 'az' | 'za' | 'popular';
 type UpgradeReason = 'prompts' | 'categories' | 'injection';
 
 interface Props {
@@ -28,6 +28,7 @@ function sortPrompts(prompts: Prompt[], order: SortOrder): Prompt[] {
     if (order === 'oldest') return a.createdAt - b.createdAt;
     if (order === 'az') return a.title.localeCompare(b.title);
     if (order === 'za') return b.title.localeCompare(a.title);
+    if (order === 'popular') return b.useCount - a.useCount;
     return 0;
   });
   return [...pinned, ...sorted];
@@ -47,15 +48,26 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
   const canAddPrompt = paid || vault.prompts.length < FREE_PROMPT_LIMIT;
   const canAddCategory = paid || vault.categories.length < FREE_CATEGORY_LIMIT;
 
+  const TOP_COUNT = 5;
+  const hasUsage = vault.prompts.some((p) => p.useCount > 0);
+
   const filtered = sortPrompts(
     vault.prompts.filter((p) => {
-      const matchCat = activeCategory === 'All' || p.category === activeCategory;
-      const matchSearch =
+      if (activeCategory === 'Top') {
+        const top = [...vault.prompts]
+          .sort((a, b) => b.useCount - a.useCount)
+          .slice(0, TOP_COUNT);
+        if (!top.find((t) => t.id === p.id)) return false;
+      } else {
+        const matchCat = activeCategory === 'All' || p.category === activeCategory;
+        if (!matchCat) return false;
+      }
+      return (
         !search ||
         p.title.toLowerCase().includes(search.toLowerCase()) ||
         p.body.toLowerCase().includes(search.toLowerCase()) ||
-        p.tags.some((t) => t.toLowerCase().includes(search.replace(/^#/, '').toLowerCase()));
-      return matchCat && matchSearch;
+        p.tags.some((t) => t.toLowerCase().includes(search.replace(/^#/, '').toLowerCase()))
+      );
     }),
     sortOrder
   );
@@ -72,6 +84,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
     const newPrompt: Prompt = {
       ...data,
       id: crypto.randomUUID(),
+      useCount: 0,
       createdAt: Date.now(),
     };
     const isNewCategory = !vault.categories.includes(data.category);
@@ -101,6 +114,15 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       createdAt: Date.now(),
     };
     onVaultChange({ ...vault, prompts: [...vault.prompts, copy] });
+  }
+
+  function handleIncrementUse(id: string) {
+    onVaultChange({
+      ...vault,
+      prompts: vault.prompts.map((p) =>
+        p.id === id ? { ...p, useCount: p.useCount + 1 } : p
+      ),
+    });
   }
 
   function handleTogglePin(id: string) {
@@ -147,6 +169,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       }
 
       await chrome.tabs.sendMessage(tab.id, { type: 'INJECT_PROMPT', prompt: text });
+      handleIncrementUse(prompt.id);
       setInjectStatus('Injected!');
       setTimeout(() => setInjectStatus(null), 1500);
     } catch {
@@ -200,6 +223,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
             <option value="oldest">Oldest</option>
             <option value="az">A→Z</option>
             <option value="za">Z→A</option>
+            <option value="popular">Popular</option>
           </select>
         </div>
 
@@ -207,6 +231,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
           <CategoryFilter
             categories={vault.categories}
             active={activeCategory}
+            showTop={hasUsage}
             onChange={setActiveCategory}
           />
           <button
@@ -243,6 +268,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
               onEdit={setEditingPrompt}
               onDuplicate={handleDuplicate}
               onTogglePin={handleTogglePin}
+              onCopy={handleIncrementUse}
               onInject={handleInject}
               onTagClick={(tag) => setSearch(`#${tag}`)}
             />
@@ -287,6 +313,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       {upgradeReason && (
         <UpgradeModal
           reason={upgradeReason}
+          totalUses={vault.prompts.reduce((sum, p) => sum + p.useCount, 0)}
           onClose={() => setUpgradeReason(null)}
         />
       )}

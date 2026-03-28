@@ -7,6 +7,7 @@ interface Props {
   onEdit: (prompt: Prompt) => void;
   onDuplicate: (prompt: Prompt) => void;
   onTogglePin: (id: string) => void;
+  onCopy: (id: string) => void;
   onInject: (prompt: Prompt) => void;
   onTagClick: (tag: string) => void;
 }
@@ -17,6 +18,7 @@ export default function PromptCard({
   onEdit,
   onDuplicate,
   onTogglePin,
+  onCopy,
   onInject,
   onTagClick,
 }: Props) {
@@ -24,6 +26,7 @@ export default function PromptCard({
 
   async function handleCopy() {
     await navigator.clipboard.writeText(prompt.body);
+    onCopy(prompt.id);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }

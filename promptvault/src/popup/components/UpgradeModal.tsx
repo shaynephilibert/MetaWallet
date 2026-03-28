@@ -2,6 +2,7 @@ import { openPaymentPage } from '../../lib/extensionpay';
 
 interface Props {
   reason: 'prompts' | 'categories' | 'injection';
+  totalUses: number;
   onClose: () => void;
 }
 
@@ -11,12 +12,18 @@ const MESSAGES = {
   injection: 'Injecting prompts into Claude, Gemini, and Grok requires the Pro plan.',
 };
 
-export default function UpgradeModal({ reason, onClose }: Props) {
+export default function UpgradeModal({ reason, totalUses, onClose }: Props) {
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
       <div className="bg-gray-900 rounded-xl p-5 w-full max-w-xs border border-gray-700">
         <h2 className="text-white font-bold text-base mb-2">Upgrade to Pro</h2>
-        <p className="text-gray-400 text-sm mb-4">{MESSAGES[reason]}</p>
+        <p className="text-gray-400 text-sm mb-3">{MESSAGES[reason]}</p>
+
+        {totalUses > 0 && (
+          <p className="text-violet-400 text-xs mb-4 bg-violet-950/50 rounded-lg px-3 py-2">
+            You've used your prompts <span className="font-bold">{totalUses}</span> time{totalUses !== 1 ? 's' : ''} — unlock the full vault.
+          </p>
+        )}
 
         <ul className="text-sm text-gray-300 space-y-1 mb-5">
           <li>✓ Unlimited prompts &amp; categories</li>

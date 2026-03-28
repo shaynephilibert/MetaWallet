@@ -7,6 +7,7 @@ export interface Prompt {
   category: string;
   tags: string[];
   pinned: boolean;
+  useCount: number;
   createdAt: number;
 }
 

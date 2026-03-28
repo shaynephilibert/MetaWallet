@@ -2,6 +2,16 @@
 
 All notable changes to PromptVault will be documented here.
 
+## [0.5.0] — 2026-03-27
+
+### Added
+- Usage tracking — inject and copy both increment a `useCount` on each prompt
+- "Popular" sort option — sorts by most-used descending (pinned prompts still float to top)
+- "★ Top" virtual tab — appears after first use; shows the 5 most-used prompts
+- Usage nudge in UpgradeModal — displays total use count to reinforce upgrade value
+
+---
+
 ## [0.4.0] — 2026-03-27
 
 ### Added

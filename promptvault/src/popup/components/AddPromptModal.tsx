@@ -42,7 +42,7 @@ export default function AddPromptModal({ categories, canAddCategory, onAdd, onUp
       .split(',')
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
-    onAdd({ title: title.trim(), body: body.trim(), category: finalCategory, tags, pinned: false });
+    onAdd({ title: title.trim(), body: body.trim(), category: finalCategory, tags, pinned: false, useCount: 0 });
     onClose();
   }
 
