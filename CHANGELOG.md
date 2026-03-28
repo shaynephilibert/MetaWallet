@@ -2,6 +2,14 @@
 
 All notable changes to PromptVault will be documented here.
 
+## [1.0.1] — 2026-03-27
+
+### Changed
+- Set ExtensionPay extension ID (store submission ready)
+- Rewrote README with proper extension docs, privacy statement, and build instructions
+
+---
+
 ## [1.0.0] — 2026-03-27
 
 ### Added

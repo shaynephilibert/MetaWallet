@@ -2,7 +2,7 @@
 // after registering at https://extensionpay.com
 import ExtPay from 'extpay';
 
-export const EXTENSION_ID = 'your-extension-id-here';
+export const EXTENSION_ID = 'testiop';
 
 export const extpay = ExtPay(EXTENSION_ID);
 

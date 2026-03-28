@@ -1,73 +1,74 @@
-# React + TypeScript + Vite
+# PromptVault — Private AI Prompt Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Save, organize, and inject prompts into ChatGPT, Claude, Gemini, and Grok with one click. All data is AES-encrypted locally — no server, no account, no data collection.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Encrypted vault** — AES-256 via `crypto-js`. Your password never leaves your device.
+- **One-click injection** — sends prompts directly into the AI input box
+- **Organize** — categories, tags, pin to top, sort by newest/oldest/A-Z/popular
+- **Import / Export** — back up your vault to JSON, restore from file
+- **Usage tracking** — tracks inject + copy counts; surfaces your top 5 prompts
+- **Freemium** — free tier (15 prompts, 3 categories, ChatGPT only); Pro via ExtensionPay ($6/mo)
 
-## React Compiler
+## Supported Platforms
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Platform | Free | Pro |
+|----------|------|-----|
+| ChatGPT | ✓ | ✓ |
+| Claude | — | ✓ |
+| Gemini | — | ✓ |
+| Grok | — | ✓ |
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19 + TypeScript + Vite
+- Tailwind CSS v4
+- `crypto-js` (AES encryption)
+- ExtensionPay (Stripe subscriptions, no backend)
+- Chrome Manifest V3
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Development
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd promptvault
+npm install
+npm run build        # production build → dist/
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Load unpacked extension in Chrome: `chrome://extensions` → Developer mode → Load unpacked → select `dist/`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+After any source change, run `npm run build` and click the refresh icon on the extension card.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ExtensionPay Setup
+
+The ExtensionPay ID is set in `src/lib/extensionpay.ts`. To change it:
+
+1. Register at [extensionpay.com](https://extensionpay.com)
+2. Create a new extension, set price to $6/month
+3. Replace the `EXTENSION_ID` value in `src/lib/extensionpay.ts`
+4. Run `npm run build`
+
+## Project Structure
+
 ```
+src/
+├── popup/
+│   ├── components/     # All UI components
+│   ├── Popup.tsx       # Root — handles auth flow
+│   ├── main.tsx
+│   └── index.html
+├── content/            # Injection scripts (one per AI platform)
+├── background/         # Service worker (ExtensionPay)
+└── lib/
+    ├── encryption.ts   # AES encrypt/decrypt
+    ├── storage.ts      # Vault read/write + import/export
+    └── extensionpay.ts # Payment status helpers
+```
+
+## Privacy
+
+- All prompt data is encrypted with your password before being written to `chrome.storage.local`
+- Your password is never stored or transmitted
+- No analytics, no telemetry, no external requests (except ExtensionPay for payment status)
+- Uninstalling the extension deletes all stored data
