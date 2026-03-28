@@ -2,6 +2,15 @@
 
 All notable changes to PromptVault will be documented here.
 
+## [1.0.0] — 2026-03-27
+
+### Added
+- Keyboard shortcuts — press `/` or `⌘K` (Ctrl+K on Windows) to focus search from anywhere in the popup; `Esc` closes any open modal
+- Empty state illustrations — inline SVG art for empty vault ("Add your first prompt") and empty search results ("Clear search" shortcut)
+- First-run onboarding overlay — 3-step walkthrough shown once on first unlock explaining Save, Inject, and Copy; persisted via `chrome.storage.local`
+
+---
+
 ## [0.5.0] — 2026-03-27
 
 ### Added

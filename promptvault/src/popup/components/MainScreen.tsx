@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { type VaultData, type Prompt } from '../../lib/storage';
+import OnboardingOverlay from './OnboardingOverlay';
 import CategoryFilter from './CategoryFilter';
 import PromptCard from './PromptCard';
 import AddPromptModal from './AddPromptModal';
@@ -44,6 +45,47 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const [search, setSearch] = useState('');
   const [injectStatus, setInjectStatus] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // First-run onboarding check
+  useEffect(() => {
+    chrome.storage.local.get('promptvault_onboarded', (result) => {
+      if (!result['promptvault_onboarded']) setShowOnboarding(true);
+    });
+  }, []);
+
+  function dismissOnboarding() {
+    chrome.storage.local.set({ promptvault_onboarded: true });
+    setShowOnboarding(false);
+  }
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const anyModalOpen =
+      showAddModal || showSettings || showManageCategories ||
+      !!editingPrompt || !!upgradeReason || showOnboarding;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        if (showAddModal) setShowAddModal(false);
+        else if (showSettings) setShowSettings(false);
+        else if (showManageCategories) setShowManageCategories(false);
+        else if (editingPrompt) setEditingPrompt(null);
+        else if (upgradeReason) setUpgradeReason(null);
+        else if (showOnboarding) dismissOnboarding();
+        return;
+      }
+      if (anyModalOpen) return;
+      if (e.key === '/' || (e.key === 'k' && (e.metaKey || e.ctrlKey))) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAddModal, showSettings, showManageCategories, editingPrompt, upgradeReason, showOnboarding]);
 
   const canAddPrompt = paid || vault.prompts.length < FREE_PROMPT_LIMIT;
   const canAddCategory = paid || vault.categories.length < FREE_CATEGORY_LIMIT;
@@ -208,6 +250,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
 
         <div className="flex gap-2 mb-2">
           <input
+            ref={searchRef}
             type="text"
             placeholder="Search prompts or #tag…"
             value={search}
@@ -254,10 +297,35 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       {/* Prompt list */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-12">
-            <p className="text-gray-600 text-sm">
-              {search ? 'No prompts match your search.' : 'No prompts yet. Add one to get started.'}
-            </p>
+          <div className="flex flex-col items-center justify-center h-full text-center py-10 gap-3">
+            {search ? (
+              <>
+                <svg viewBox="0 0 64 64" className="w-12 h-12 opacity-30" fill="none">
+                  <circle cx="28" cy="28" r="18" stroke="#6d28d9" strokeWidth="3" />
+                  <path d="M42 42l12 12" stroke="#6d28d9" strokeWidth="3" strokeLinecap="round" />
+                  <path d="M22 28h12M28 22v12" stroke="#6d28d9" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
+                </svg>
+                <p className="text-gray-600 text-sm">No prompts match your search.</p>
+                <button onClick={() => setSearch('')} className="text-violet-500 text-xs hover:underline">
+                  Clear search
+                </button>
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 64 64" className="w-14 h-14 opacity-30" fill="none">
+                  <rect x="8" y="16" width="48" height="36" rx="6" stroke="#6d28d9" strokeWidth="3" />
+                  <path d="M32 28v12M26 34h12" stroke="#6d28d9" strokeWidth="2.5" strokeLinecap="round" />
+                  <path d="M20 16v-4a12 12 0 0124 0v4" stroke="#6d28d9" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+                <p className="text-gray-600 text-sm">Your vault is empty.</p>
+                <button
+                  onClick={handleAddClick}
+                  className="text-violet-500 text-xs hover:underline"
+                >
+                  Add your first prompt
+                </button>
+              </>
+            )}
           </div>
         ) : (
           filtered.map((p) => (
@@ -317,6 +385,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
           onClose={() => setUpgradeReason(null)}
         />
       )}
+      {showOnboarding && <OnboardingOverlay onDismiss={dismissOnboarding} />}
     </div>
   );
 }
