@@ -12,11 +12,16 @@ export default function EditPromptModal({ prompt, categories, onSave, onClose }:
   const [title, setTitle] = useState(prompt.title);
   const [body, setBody] = useState(prompt.body);
   const [category, setCategory] = useState(prompt.category);
+  const [tagsInput, setTagsInput] = useState(prompt.tags.join(', '));
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !body.trim()) return;
-    onSave({ ...prompt, title: title.trim(), body: body.trim(), category });
+    const tags = tagsInput
+      .split(',')
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    onSave({ ...prompt, title: title.trim(), body: body.trim(), category, tags });
     onClose();
   }
 
@@ -45,6 +50,13 @@ export default function EditPromptModal({ prompt, categories, onSave, onClose }:
             onChange={(e) => setBody(e.target.value)}
             rows={4}
             className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-violet-500 resize-none"
+          />
+          <input
+            type="text"
+            placeholder="Tags: writing, seo, emails  (comma-separated)"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-violet-500"
           />
           <select
             value={category}

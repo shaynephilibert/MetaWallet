@@ -5,10 +5,14 @@ import PromptCard from './PromptCard';
 import AddPromptModal from './AddPromptModal';
 import EditPromptModal from './EditPromptModal';
 import SettingsModal from './SettingsModal';
+import ManageCategoriesModal from './ManageCategoriesModal';
 import UpgradeModal from './UpgradeModal';
 
 const FREE_PROMPT_LIMIT = 15;
 const FREE_CATEGORY_LIMIT = 3;
+
+type SortOrder = 'newest' | 'oldest' | 'az' | 'za';
+type UpgradeReason = 'prompts' | 'categories' | 'injection';
 
 interface Props {
   vault: VaultData;
@@ -16,12 +20,25 @@ interface Props {
   onVaultChange: (updated: VaultData) => void;
 }
 
-type UpgradeReason = 'prompts' | 'categories' | 'injection';
+function sortPrompts(prompts: Prompt[], order: SortOrder): Prompt[] {
+  const pinned = prompts.filter((p) => p.pinned);
+  const rest = prompts.filter((p) => !p.pinned);
+  const sorted = [...rest].sort((a, b) => {
+    if (order === 'newest') return b.createdAt - a.createdAt;
+    if (order === 'oldest') return a.createdAt - b.createdAt;
+    if (order === 'az') return a.title.localeCompare(b.title);
+    if (order === 'za') return b.title.localeCompare(a.title);
+    return 0;
+  });
+  return [...pinned, ...sorted];
+}
 
 export default function MainScreen({ vault, paid, onVaultChange }: Props) {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showManageCategories, setShowManageCategories] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const [search, setSearch] = useState('');
@@ -30,14 +47,18 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
   const canAddPrompt = paid || vault.prompts.length < FREE_PROMPT_LIMIT;
   const canAddCategory = paid || vault.categories.length < FREE_CATEGORY_LIMIT;
 
-  const filtered = vault.prompts.filter((p) => {
-    const matchCat = activeCategory === 'All' || p.category === activeCategory;
-    const matchSearch =
-      !search ||
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.body.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const filtered = sortPrompts(
+    vault.prompts.filter((p) => {
+      const matchCat = activeCategory === 'All' || p.category === activeCategory;
+      const matchSearch =
+        !search ||
+        p.title.toLowerCase().includes(search.toLowerCase()) ||
+        p.body.toLowerCase().includes(search.toLowerCase()) ||
+        p.tags.some((t) => t.toLowerCase().includes(search.replace(/^#/, '').toLowerCase()));
+      return matchCat && matchSearch;
+    }),
+    sortOrder
+  );
 
   function handleAddClick() {
     if (!canAddPrompt) {
@@ -76,13 +97,22 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       ...prompt,
       id: crypto.randomUUID(),
       title: `${prompt.title} (copy)`,
+      pinned: false,
       createdAt: Date.now(),
     };
     onVaultChange({ ...vault, prompts: [...vault.prompts, copy] });
   }
 
+  function handleTogglePin(id: string) {
+    onVaultChange({
+      ...vault,
+      prompts: vault.prompts.map((p) =>
+        p.id === id ? { ...p, pinned: !p.pinned } : p
+      ),
+    });
+  }
+
   async function handleInject(prompt: Prompt) {
-    // Resolve variables in paid plan
     let text = prompt.body;
     if (paid) {
       const vars = [...text.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]);
@@ -103,7 +133,6 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       const isClaude = url.includes('claude.ai');
       const isGemini = url.includes('gemini.google.com');
       const isGrok = url.includes('grok.com');
-
       const isPaidPlatform = isClaude || isGemini || isGrok;
 
       if (isPaidPlatform && !paid) {
@@ -154,19 +183,40 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
           </div>
         </div>
 
-        <input
-          type="text"
-          placeholder="Search prompts…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-3 py-1.5 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-violet-500 mb-2"
-        />
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            placeholder="Search prompts or #tag…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 px-3 py-1.5 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-violet-500"
+          />
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+            className="px-2 py-1.5 rounded-lg bg-gray-800 text-gray-400 text-xs border border-gray-700 focus:outline-none focus:border-violet-500"
+          >
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="az">A→Z</option>
+            <option value="za">Z→A</option>
+          </select>
+        </div>
 
-        <CategoryFilter
-          categories={vault.categories}
-          active={activeCategory}
-          onChange={setActiveCategory}
-        />
+        <div className="flex items-center gap-1">
+          <CategoryFilter
+            categories={vault.categories}
+            active={activeCategory}
+            onChange={setActiveCategory}
+          />
+          <button
+            onClick={() => setShowManageCategories(true)}
+            className="shrink-0 text-gray-600 hover:text-gray-400 text-xs px-1 transition-colors"
+            title="Manage categories"
+          >
+            ✎
+          </button>
+        </div>
       </div>
 
       {/* Inject status toast */}
@@ -192,7 +242,9 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
               onDelete={handleDelete}
               onEdit={setEditingPrompt}
               onDuplicate={handleDuplicate}
+              onTogglePin={handleTogglePin}
               onInject={handleInject}
+              onTagClick={(tag) => setSearch(`#${tag}`)}
             />
           ))
         )}
@@ -213,6 +265,15 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
           vault={vault}
           onVaultChange={onVaultChange}
           onClose={() => setShowSettings(false)}
+        />
+      )}
+      {showManageCategories && (
+        <ManageCategoriesModal
+          vault={vault}
+          paid={paid}
+          onVaultChange={onVaultChange}
+          onUpgrade={() => { setShowManageCategories(false); setUpgradeReason('categories'); }}
+          onClose={() => setShowManageCategories(false)}
         />
       )}
       {editingPrompt && (

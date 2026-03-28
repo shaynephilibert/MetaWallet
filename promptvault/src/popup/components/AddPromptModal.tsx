@@ -17,6 +17,7 @@ export default function AddPromptModal({ categories, canAddCategory, onAdd, onUp
   const [category, setCategory] = useState(categories[0] ?? 'General');
   const [newCategory, setNewCategory] = useState('');
   const [addingNew, setAddingNew] = useState(false);
+  const [tagsInput, setTagsInput] = useState('');
 
   function handleCategoryChange(val: string) {
     if (val === NEW_CATEGORY_SENTINEL) {
@@ -37,7 +38,11 @@ export default function AddPromptModal({ categories, canAddCategory, onAdd, onUp
     if (!title.trim() || !body.trim()) return;
     const finalCategory = addingNew ? newCategory.trim() : category;
     if (!finalCategory) return;
-    onAdd({ title: title.trim(), body: body.trim(), category: finalCategory });
+    const tags = tagsInput
+      .split(',')
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    onAdd({ title: title.trim(), body: body.trim(), category: finalCategory, tags, pinned: false });
     onClose();
   }
 
@@ -66,6 +71,13 @@ export default function AddPromptModal({ categories, canAddCategory, onAdd, onUp
             onChange={(e) => setBody(e.target.value)}
             rows={4}
             className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-violet-500 resize-none"
+          />
+          <input
+            type="text"
+            placeholder="Tags: writing, seo, emails  (comma-separated)"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-violet-500"
           />
 
           {addingNew ? (

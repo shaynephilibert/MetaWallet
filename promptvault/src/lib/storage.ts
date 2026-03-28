@@ -5,6 +5,8 @@ export interface Prompt {
   title: string;
   body: string;
   category: string;
+  tags: string[];
+  pinned: boolean;
   createdAt: number;
 }
 

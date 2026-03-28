@@ -2,6 +2,17 @@
 
 All notable changes to PromptVault will be documented here.
 
+## [0.4.0] — 2026-03-27
+
+### Added
+- Pin prompts — star icon on each card; pinned prompts always sort to the top (shown with violet border)
+- Sort controls — dropdown in search bar to sort by Newest, Oldest, A→Z, Z→A
+- Tags — comma-separated tags on prompts; displayed as clickable chips that filter the list via search
+- Manage Categories modal — add, rename, and delete categories from the ✎ button next to the category tabs; deleting a category re-assigns its prompts to the next available one
+- Free tier category limit enforced in ManageCategoriesModal
+
+---
+
 ## [0.3.0] — 2026-03-27
 
 ### Added
