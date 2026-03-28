@@ -5,10 +5,11 @@ interface Props {
   prompt: Prompt;
   onDelete: (id: string) => void;
   onEdit: (prompt: Prompt) => void;
+  onDuplicate: (prompt: Prompt) => void;
   onInject: (prompt: Prompt) => void;
 }
 
-export default function PromptCard({ prompt, onDelete, onEdit, onInject }: Props) {
+export default function PromptCard({ prompt, onDelete, onEdit, onDuplicate, onInject }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -46,6 +47,13 @@ export default function PromptCard({ prompt, onDelete, onEdit, onInject }: Props
           className="py-1 px-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs transition-colors"
         >
           Edit
+        </button>
+        <button
+          onClick={() => onDuplicate(prompt)}
+          className="py-1 px-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs transition-colors"
+          title="Duplicate"
+        >
+          ⧉
         </button>
         <button
           onClick={() => onDelete(prompt.id)}

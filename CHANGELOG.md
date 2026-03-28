@@ -2,6 +2,16 @@
 
 All notable changes to PromptVault will be documented here.
 
+## [0.3.0] — 2026-03-27
+
+### Added
+- Export vault — downloads all prompts as a dated `.json` file from the Settings modal
+- Import prompts — merge prompts from a PromptVault export file; duplicates (by id) are skipped
+- Duplicate prompt — one-click clone of any prompt card (appends " (copy)" to title)
+- Settings modal — accessible via gear icon (⚙) in the header
+
+---
+
 ## [0.1.1] — 2026-03-27
 
 ### Added

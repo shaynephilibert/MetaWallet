@@ -4,6 +4,7 @@ import CategoryFilter from './CategoryFilter';
 import PromptCard from './PromptCard';
 import AddPromptModal from './AddPromptModal';
 import EditPromptModal from './EditPromptModal';
+import SettingsModal from './SettingsModal';
 import UpgradeModal from './UpgradeModal';
 
 const FREE_PROMPT_LIMIT = 15;
@@ -20,6 +21,7 @@ type UpgradeReason = 'prompts' | 'categories' | 'injection';
 export default function MainScreen({ vault, paid, onVaultChange }: Props) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const [search, setSearch] = useState('');
@@ -67,6 +69,16 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       ...vault,
       prompts: vault.prompts.map((p) => (p.id === updated.id ? updated : p)),
     });
+  }
+
+  function handleDuplicate(prompt: Prompt) {
+    const copy: Prompt = {
+      ...prompt,
+      id: crypto.randomUUID(),
+      title: `${prompt.title} (copy)`,
+      createdAt: Date.now(),
+    };
+    onVaultChange({ ...vault, prompts: [...vault.prompts, copy] });
   }
 
   async function handleInject(prompt: Prompt) {
@@ -127,6 +139,13 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
               </span>
             )}
             <button
+              onClick={() => setShowSettings(true)}
+              className="p-1 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition-colors"
+              title="Settings"
+            >
+              ⚙
+            </button>
+            <button
               onClick={handleAddClick}
               className="px-3 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors"
             >
@@ -172,6 +191,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
               prompt={p}
               onDelete={handleDelete}
               onEdit={setEditingPrompt}
+              onDuplicate={handleDuplicate}
               onInject={handleInject}
             />
           ))
@@ -186,6 +206,13 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
           onAdd={handleAdd}
           onUpgrade={() => { setShowAddModal(false); setUpgradeReason('categories'); }}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+      {showSettings && (
+        <SettingsModal
+          vault={vault}
+          onVaultChange={onVaultChange}
+          onClose={() => setShowSettings(false)}
         />
       )}
       {editingPrompt && (
