@@ -3,9 +3,11 @@ import { type VaultData, type Prompt } from '../../lib/storage';
 import CategoryFilter from './CategoryFilter';
 import PromptCard from './PromptCard';
 import AddPromptModal from './AddPromptModal';
+import EditPromptModal from './EditPromptModal';
 import UpgradeModal from './UpgradeModal';
 
 const FREE_PROMPT_LIMIT = 15;
+const FREE_CATEGORY_LIMIT = 3;
 
 interface Props {
   vault: VaultData;
@@ -18,11 +20,13 @@ type UpgradeReason = 'prompts' | 'categories' | 'injection';
 export default function MainScreen({ vault, paid, onVaultChange }: Props) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const [upgradeReason, setUpgradeReason] = useState<UpgradeReason | null>(null);
   const [search, setSearch] = useState('');
   const [injectStatus, setInjectStatus] = useState<string | null>(null);
 
   const canAddPrompt = paid || vault.prompts.length < FREE_PROMPT_LIMIT;
+  const canAddCategory = paid || vault.categories.length < FREE_CATEGORY_LIMIT;
 
   const filtered = vault.prompts.filter((p) => {
     const matchCat = activeCategory === 'All' || p.category === activeCategory;
@@ -47,11 +51,22 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       id: crypto.randomUUID(),
       createdAt: Date.now(),
     };
-    onVaultChange({ ...vault, prompts: [...vault.prompts, newPrompt] });
+    const isNewCategory = !vault.categories.includes(data.category);
+    const categories = isNewCategory
+      ? [...vault.categories, data.category]
+      : vault.categories;
+    onVaultChange({ ...vault, prompts: [...vault.prompts, newPrompt], categories });
   }
 
   function handleDelete(id: string) {
     onVaultChange({ ...vault, prompts: vault.prompts.filter((p) => p.id !== id) });
+  }
+
+  function handleEdit(updated: Prompt) {
+    onVaultChange({
+      ...vault,
+      prompts: vault.prompts.map((p) => (p.id === updated.id ? updated : p)),
+    });
   }
 
   async function handleInject(prompt: Prompt) {
@@ -156,6 +171,7 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
               key={p.id}
               prompt={p}
               onDelete={handleDelete}
+              onEdit={setEditingPrompt}
               onInject={handleInject}
             />
           ))
@@ -166,8 +182,18 @@ export default function MainScreen({ vault, paid, onVaultChange }: Props) {
       {showAddModal && (
         <AddPromptModal
           categories={vault.categories}
+          canAddCategory={canAddCategory}
           onAdd={handleAdd}
+          onUpgrade={() => { setShowAddModal(false); setUpgradeReason('categories'); }}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+      {editingPrompt && (
+        <EditPromptModal
+          prompt={editingPrompt}
+          categories={vault.categories}
+          onSave={handleEdit}
+          onClose={() => setEditingPrompt(null)}
         />
       )}
       {upgradeReason && (

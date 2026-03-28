@@ -3,19 +3,41 @@ import { type Prompt } from '../../lib/storage';
 
 interface Props {
   categories: string[];
+  canAddCategory: boolean;
   onAdd: (prompt: Omit<Prompt, 'id' | 'createdAt'>) => void;
+  onUpgrade: () => void;
   onClose: () => void;
 }
 
-export default function AddPromptModal({ categories, onAdd, onClose }: Props) {
+const NEW_CATEGORY_SENTINEL = '__new__';
+
+export default function AddPromptModal({ categories, canAddCategory, onAdd, onUpgrade, onClose }: Props) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [category, setCategory] = useState(categories[0] ?? 'General');
+  const [newCategory, setNewCategory] = useState('');
+  const [addingNew, setAddingNew] = useState(false);
+
+  function handleCategoryChange(val: string) {
+    if (val === NEW_CATEGORY_SENTINEL) {
+      if (!canAddCategory) {
+        onUpgrade();
+        return;
+      }
+      setAddingNew(true);
+      setCategory('');
+    } else {
+      setAddingNew(false);
+      setCategory(val);
+    }
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !body.trim()) return;
-    onAdd({ title: title.trim(), body: body.trim(), category });
+    const finalCategory = addingNew ? newCategory.trim() : category;
+    if (!finalCategory) return;
+    onAdd({ title: title.trim(), body: body.trim(), category: finalCategory });
     onClose();
   }
 
@@ -45,15 +67,38 @@ export default function AddPromptModal({ categories, onAdd, onClose }: Props) {
             rows={4}
             className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-violet-500 resize-none"
           />
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white text-sm border border-gray-700 focus:outline-none focus:border-violet-500"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+
+          {addingNew ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Category name"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                autoFocus
+                className="flex-1 px-3 py-2 rounded-lg bg-gray-800 text-white text-sm placeholder-gray-500 border border-violet-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => { setAddingNew(false); setCategory(categories[0] ?? 'General'); }}
+                className="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 text-xs transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <select
+              value={category}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg bg-gray-800 text-white text-sm border border-gray-700 focus:outline-none focus:border-violet-500"
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+              <option value={NEW_CATEGORY_SENTINEL}>+ New category{!canAddCategory ? ' (Pro)' : ''}</option>
+            </select>
+          )}
+
           <div className="flex gap-2 pt-1">
             <button
               type="submit"

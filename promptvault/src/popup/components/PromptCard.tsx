@@ -4,10 +4,11 @@ import { type Prompt } from '../../lib/storage';
 interface Props {
   prompt: Prompt;
   onDelete: (id: string) => void;
+  onEdit: (prompt: Prompt) => void;
   onInject: (prompt: Prompt) => void;
 }
 
-export default function PromptCard({ prompt, onDelete, onInject }: Props) {
+export default function PromptCard({ prompt, onDelete, onEdit, onInject }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -39,6 +40,12 @@ export default function PromptCard({ prompt, onDelete, onInject }: Props) {
           className="flex-1 py-1 rounded bg-violet-700 hover:bg-violet-600 text-white text-xs transition-colors"
         >
           Inject
+        </button>
+        <button
+          onClick={() => onEdit(prompt)}
+          className="py-1 px-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-400 text-xs transition-colors"
+        >
+          Edit
         </button>
         <button
           onClick={() => onDelete(prompt.id)}
